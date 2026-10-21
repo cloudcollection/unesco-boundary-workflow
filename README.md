@@ -6,6 +6,7 @@ An evidence-first workflow for UNESCO World Heritage boundaries, combining
 source retrieval, official map downloads and reviewed GIS packaging.
 
 ![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB)
+[![Checks](https://github.com/cloudcollection/unesco-boundary-workflow/actions/workflows/checks.yml/badge.svg)](https://github.com/cloudcollection/unesco-boundary-workflow/actions/workflows/checks.yml)
 
 ## 这个仓库做什么
 

@@ -13,6 +13,7 @@
 | 离线演示 | 带孔 MultiPolygon 导出并回读，1 条图形/属性，面积约 508.002090 ha |
 | 真实 WHC 连通 | UNESCO 870：图层 0 返回 7 条记录，图层 1/2 返回空 FeatureCollection |
 | 响应重放 | 上述官方响应在离线模式下得到相同候选/状态结果 |
+| GitHub Actions | Windows/Linux × Python 3.12/3.13 四个组合全部通过 |
 
 真实服务响应时间约为 2026-10-21 11:16（Asia/Shanghai）。查询使用原仓库
 记录的 WHC FeatureServer，对 0/1/2 层应用 `property_id=870`、
@@ -29,6 +30,7 @@
 完整审核的导出、OSM relation/way 类型、HTML 下载误判、官方 API 错误、
 离线缺失/篡改、离线命令链和退出码。合成数据不代表真实遗产边界。
 
-GitHub Actions 另配置了 Windows/Linux、Python 3.12/3.13 四个组合。
-本记录报告本地实际执行结果，远端矩阵以仓库 Actions 中的实际运行结果为准。
+GitHub Actions 的[首次完整运行](https://github.com/cloudcollection/unesco-boundary-workflow/actions/runs/39537913006)
+在 Windows/Linux、Python 3.12/3.13 四个组合中均完成安装、24 项回归、
+Skill/文档检查与离线演示。后续变更结果以仓库 Actions 为准。
 PDF 配准、复杂关系拼接和大批量长时间运行未在本次验证中自动化测试。
