@@ -7,7 +7,7 @@
 ![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB)
 [![Checks](https://github.com/cloudcollection/unesco-boundary-workflow/actions/workflows/checks.yml/badge.svg)](https://github.com/cloudcollection/unesco-boundary-workflow/actions/workflows/checks.yml)
 
-## 可以做什么
+## 功能
 
 | 命令 | 用途 | 结果 |
 |---|---|---|
@@ -18,10 +18,16 @@
 
 ```mermaid
 flowchart LR
-    A[准备遗产清单] --> B[检索边界 / 下载地图]
-    B --> C[选择并核对边界]
-    C --> D[检查几何]
-    D --> E[导出 GIS 数据包]
+    A[遗产 ID 与组件] --> B[WHC 官方核心边界]
+    B --> C[候选几何]
+    B --> D[缺失或不可用]
+    D --> E[其他官方矢量 / OSM]
+    D --> F[官方地图文档]
+    F --> G[有证据的提取或配准]
+    E --> C
+    G --> C
+    C --> H[来源、位置、面积、组件审核]
+    H --> I[按审核状态导出 GIS 包]
 ```
 
 ## 安装与第一次运行
@@ -78,7 +84,7 @@ unesco-boundary package --geojson source.geojson --review review.json --out-root
 
 这里的 `source.geojson` 和 `review.json` 分别是你选定的边界和填写完成的审核文件。地图 PDF/图片转成矢量边界、配准和复杂 OSM 关系拼接需要另行使用 GIS 工具完成。
 
-## 得到什么文件
+## 结果文件
 
 每个遗产对应一个 `outputs/<状态>/<本地编号>_<名称>/` 文件夹：
 
