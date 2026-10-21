@@ -1,0 +1,20 @@
+{
+  "local_id": 615,
+  "unesco_id": 870,
+  "site_name": "Historic Monuments of Ancient Nara",
+  "source_sha256": "REPLACE_WITH_SHA256_OF_EXACT_GEOJSON_BYTES",
+  "source_kind": "official_whc",
+  "source_url": "REPLACE_WITH_EXACT_SOURCE_URL",
+  "reviewer": "REPLACE_WITH_REVIEWER",
+  "reviewed_at": "REPLACE_WITH_ISO8601_TIMESTAMP",
+  "status": "review_needed",
+  "scope_note": "Describe property/core scope and the selected boundary version",
+  "official_check": {"url": "REPLACE_WITH_WHC_CORE_QUERY", "outcome": "REPLACE_WITH_found_empty_or_unusable", "note": "Record evidence, not a guessed result"},
+  "checks": {"authority": false, "property_core": false, "location": false, "component_coverage": false, "area": false},
+  "expected_components": [],
+  "covered_components": [],
+  "official_area_ha": null,
+  "area_comparison_note": "Record source field, units, total versus component scope and measured difference",
+  "rejected_candidates": [],
+  "caveats": ["Not yet reviewed"]
+}

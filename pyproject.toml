@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unesco-boundary-workflow"
+version = "0.1.0"
+description = "Evidence-first UNESCO World Heritage boundary retrieval and GIS packaging"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "MIT AND Apache-2.0"}
+dependencies = ["requests==2.32.5", "beautifulsoup4==4.14.2", "shapely==2.1.2", "pyproj==3.7.2", "pyshp==2.3.1", "openpyxl==3.1.5"]
+
+[project.scripts]
+unesco-boundary = "unesco_boundary.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-p no:cacheprovider"

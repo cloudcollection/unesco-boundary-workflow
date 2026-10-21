@@ -1,0 +1,124 @@
+{
+  "checked_on": "2026-10-21",
+  "repositories": [
+    {
+      "repository": "cloudcollection/unesco-whc-osm-boundary-retriever",
+      "commit": "115ae2b373d3e010c03715ba3287f96877320209",
+      "files": [
+        {
+          "path": "LICENSE",
+          "git_blob_sha": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+          "bytes": 11357
+        },
+        {
+          "path": "README.md",
+          "git_blob_sha": "b0da6d78012a2f98a05544a0a930e5e1cae24717",
+          "bytes": 2677
+        },
+        {
+          "path": "SKILL.md",
+          "git_blob_sha": "985ac8ba5e4eaf72ad0030444c531fa02fcf2753",
+          "bytes": 4428
+        },
+        {
+          "path": "agents/openai.yaml",
+          "git_blob_sha": "eacaf13bf90311ffdd2bcff841a401ead0bc371e",
+          "bytes": 288
+        },
+        {
+          "path": "references/osm-source-decision.md",
+          "git_blob_sha": "965432a7b8c69bde2ff9a62d4c4bf82fb83ae0ea",
+          "bytes": 1294
+        },
+        {
+          "path": "scripts/whc_osm_boundary_retrieve.py",
+          "git_blob_sha": "dd0d7ed5a918e811f15f7c98273075d669121966",
+          "bytes": 12244
+        }
+      ]
+    },
+    {
+      "repository": "cloudcollection/unesco-boundary-packager",
+      "commit": "dc8b29c2cb770815f2f5875c07aaf8fa47e1066c",
+      "files": [
+        {
+          "path": ".gitignore",
+          "git_blob_sha": "b908d4cbe37ccea3388a2f308595ae63a255755d",
+          "bytes": 29
+        },
+        {
+          "path": "README.md",
+          "git_blob_sha": "1194e1dcd09f6d66fb815abb385476abcf427bb8",
+          "bytes": 1768
+        },
+        {
+          "path": "SKILL.md",
+          "git_blob_sha": "063b7dab1b1441eb14a7c428d55bda63badb53c7",
+          "bytes": 14033
+        },
+        {
+          "path": "agents/openai.yaml",
+          "git_blob_sha": "07ee371da56ab2d663e46034b6b40609f1d38e13",
+          "bytes": 246
+        },
+        {
+          "path": "references/automation-prompt.md",
+          "git_blob_sha": "6f2dfe106a535cdd4bd4a044f7ce6153c3dfdb56",
+          "bytes": 3132
+        },
+        {
+          "path": "references/raster-digitization.md",
+          "git_blob_sha": "a26a07dc48de4c85906e7c7bb574a051468ce476",
+          "bytes": 8317
+        },
+        {
+          "path": "references/scale-anchor-digitization.md",
+          "git_blob_sha": "a477c2e10d0a2c0d31a3e0d96763065125e43d41",
+          "bytes": 6587
+        },
+        {
+          "path": "references/session-summary.md",
+          "git_blob_sha": "cca4534931eaf3a63745f89f4f0058d9dd4ae4dd",
+          "bytes": 2780
+        },
+        {
+          "path": "references/source-policy.md",
+          "git_blob_sha": "90c124fdec0598b22e645825275b862e4541772d",
+          "bytes": 3534
+        },
+        {
+          "path": "scripts/build_package_from_geojson.py",
+          "git_blob_sha": "762084606311d631faa49feaa16cd09a00f636b1",
+          "bytes": 3658
+        },
+        {
+          "path": "scripts/inspect_shapefile.py",
+          "git_blob_sha": "1e8ae8ee04515005ad78362bad0e08ae1ba8876c",
+          "bytes": 1183
+        }
+      ]
+    },
+    {
+      "repository": "cloudcollection/UNESCO_Map_SC",
+      "commit": "1cac563e3415211fa12795bda509ae0c23aa9e61",
+      "files": [
+        {
+          "path": "LICENSE",
+          "git_blob_sha": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+          "bytes": 11357
+        },
+        {
+          "path": "README.md",
+          "git_blob_sha": "11a92fae362f84c58f75aa622dc68ed0494fa96f",
+          "bytes": 35
+        },
+        {
+          "path": "sc_500.py",
+          "git_blob_sha": "2548bde7ef530d81d4ee04f768da3dcda1eff750",
+          "bytes": 8158
+        }
+      ]
+    }
+  ]
+}
+

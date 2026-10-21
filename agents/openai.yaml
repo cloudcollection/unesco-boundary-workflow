@@ -1,0 +1,4 @@
+interface:
+  display_name: "UNESCO Boundary Workflow"
+  short_description: "Review boundary sources and export traceable GIS packages"
+  default_prompt: "Use $unesco-boundary-workflow to retrieve and review UNESCO property boundaries, preserve source evidence, and package only defensible geometry."
