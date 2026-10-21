@@ -8,16 +8,6 @@ queries from cloudcollection/unesco-whc-osm-boundary-retriever.
 src/unesco_boundary/maps.py adapts official-map link discovery from
 cloudcollection/UNESCO_Map_SC. These two files remain Apache-2.0;
 see licenses/Apache-2.0.txt. Both have been substantially rewritten.
-Exact source revisions and file hashes are in docs/source-manifest.json.
-
-The workflow also consolidates the same owner's unesco-boundary-packager
-skill and packaging approach. No LICENSE file was present in that source
-revision. Its material has been rewritten for this integration, released
-by the repository owner under the MIT License.
-
-External reference projects were consulted for structure and writing;
-their implementations were not vendored. See docs/design-references.md.
-
 Code licenses do not grant rights to UNESCO maps, official geodata, or
 OpenStreetMap data. Preserve publisher terms and OSM attribution/ODbL
 obligations when distributing derived datasets.

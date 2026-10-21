@@ -1,92 +1,145 @@
-# 运行与复现
+# 使用教程
 
-## 从三个仓库迁移
+本教程从遗产清单开始，说明如何查找候选、选择边界并导出 GIS 数据包。先按 [README](../README.md#安装与第一次运行) 安装，并运行离线示例确认环境可用。
 
-1. 冻结原仓库版本，保存文件路径、Git blob SHA 和代码审阅记录。
-2. 将来源检索、地图收集、几何验证、打包拆成同一 Python 包的四个命令。
-3. 用根目录 `SKILL.md` 连接工作步骤；条件性细节留在 `references/`。
-4. 针对原代码缺陷编写离线测试，再保存实际安装环境和小范围联网检查结果。
-5. 新仓库独立发布。旧仓库、原始项目工作簿和本地 GIS 源文件继续保留。
+## 1. 准备遗产清单
 
-这是代码和方法的整合，原仓库 Git 历史未合并进新仓库；精确来源见
-[source-manifest.json](source-manifest.json)。原文快照留在本次任务的本地审阅目录，
-公开仓库保留清单和必要的方法说明，不附带个人路径、邮件地址及历史会话材料。
+创建 UTF-8 编码的 CSV，或使用 XLSX 的活动工作表。列名固定，顺序不限：
 
-## 环境
-
-`pyproject.toml` 固定直接依赖；`requirements.lock.txt` 记录本次 Windows x64 /
-Python 3.12 环境的完整依赖版本，供重建相同环境。它不是跨平台字节一致性承诺，
-也未包含 wheel 哈希或底层系统库。GitHub Actions 配置在 Windows/Linux 和
-Python 3.12/3.13 上运行离线测试；远端实际结果以 Actions 为准。
-
-Windows 上可在启动安装前指定临时目录，避免安装器使用系统盘：
-
-```powershell
-New-Item -ItemType Directory -Force 'D:\Temp\unesco' | Out-Null
-$env:TEMP='D:\Temp\unesco'
-$env:TMP=$env:TEMP
-$env:PIP_CACHE_DIR=Join-Path $env:TEMP 'pip-cache'
-$env:PYTHONDONTWRITEBYTECODE='1'
+```csv
+id,unesco_id,site_name
+615,870,Historic Monuments of Ancient Nara
 ```
 
-临时路径仅为示例，可改为自己的数据盘目录。
-`runs/`、`outputs/` 和虚拟环境不提交到仓库。不要把真实联系方式写进公开示例数据。
+| 列名 | 要求 |
+|---|---|
+| `id` | 项目自定的正整数编号，每行唯一 |
+| `unesco_id` | UNESCO 官方遗产编号，例如官方条目 `/en/list/870/` 中的 `870` |
+| `site_name` | 完整遗产名称 |
+| `remarks` | 可选，填写已知 OSM 编号，如 `relation 123456` 或 `way 789012` |
+| `right or not` | 可选，`1` 表示已核对，此行默认跳过 |
 
-## 输入与检索
+## 2. 检索边界与下载地图
 
-CSV（UTF-8）或 XLSX 活动工作表至少提供 `id`、`unesco_id`、`site_name` 三列。
-`id` 是本地行标识，`unesco_id` 才是官方遗产 ID。可选 `remarks` 保存显式
-OSM relation/way 信息，`right or not=1` 默认跳过；有授权重查时使用
-`--override-verified`。列顺序不影响读取，缺列和重复本地 ID 会报错。
+打开遗产的官方条目和 maps 页面，确认所需边界版本以及是否包含多个组件。然后运行：
 
-在工作前打开官方遗产页和 maps 页，确认历史版本与组件范围。`probe` 自动查询
-WHC 0/1/2 图层，并保存原始字段。服务结构改变、截断、HTTP/API 错误会被记录，
-不会自动解释成“官方无边界”。检索候选一律待审核；没有靠名称和面积打分直接
-变成 `correct` 的捷径。
-
-`probe` 的 OSM 名称/显式 ID 查询是辅助发现功能。其他官方矢量门户、
-附近 Overpass 检索、复杂 relation 拼接、PDF 元数据提取和 QGIS 配准没有自动实现。
-做这些步骤时保存查询、脚本、投影、控制点和中间结果，再把选定的 WGS84
-FeatureCollection 交给同一套审核/打包流程。
-
-## 响应快照与离线重放
-
-```text
-runs/nara-01/
-  raw/                URL 哈希命名的响应字节与元数据
-  candidates/615/     待审核官方/OSM 几何
-  reviews/            每个本地 ID 的检索记录
-  maps/870/           地图文档与 manifest.json
-  retrieval.json      机器可读汇总
-  retrieval.md        人工检查表
+```bash
+unesco-boundary probe --input examples/sites.csv --run runs/nara-01 --no-osm --user-agent "BoundaryStudy/1.0 (https://github.com/YOUR_ACCOUNT)"
 ```
 
-同 URL 的快照会复用，先检查保存内容的 SHA-256。`--offline` 禁止联网，
-归档缺失就报错。下载失败的 HTTP 响应也保留；需要重试更新时，新建 run 目录。
-自动重试限三次并限速，不能消除服务端变化。记录所用代码提交和输入清单，
-与运行环境一起保存；响应快照与来源版本才是复现某次结果的关键。
+将 `YOUR_ACCOUNT` 替换为自己的公开项目或个人主页地址。请求会查询 WHC 的组件元数据、核心边界和缓冲区图层。
 
-## 审核与交付
+查看 `runs/nara-01/retrieval.md` 中的结果，并打开 `candidates/` 下的 GeoJSON。官方核心图层可能没有多边形；此时可从官方 GIS 门户寻找数据，或去掉 `--no-osm` 查询 OSM 候选。检索结果保留在待核对状态，不会自动导出为最终边界。
 
-审核记录绑定源 GeoJSON 的原始字节 SHA-256，连格式化变更也需要重算并重新核对。
-对 `correct` 要求正面的五项检查、明确且完整的组件 ID 列表、官方面积和比较说明。
-它们是审核人填写的判断，程序不替人证明权威性。没有可信替代时不打包猜测几何。
+需要地图资料时运行：
 
-包先写入新建暂存目录，回读 GeoJSON/Shapefile，确认图形和属性条数、
-孔洞与多岛保持一致，成功后才移到对应状态目录。已存在的同名输出会报错。
-这是防止覆盖的设计；需要修订时先给旧包留存版本，再选择新的输出根目录。
-当前 CLI 不改写原工作簿、旧源文件或已有包，也不自动移动不同状态下的历史版本。
+```bash
+unesco-boundary maps --unesco-id 870 --run runs/nara-01 --user-agent "BoundaryStudy/1.0 (https://github.com/YOUR_ACCOUNT)"
+```
 
-GeoJSON 是完整属性存档；Shapefile DBF 只保留索引，长中文名称按 UTF-8
-完整字符截到 240 字节。当前拒绝未闭合环、无效拓扑、混合/点几何、非二维坐标
-和跨日期变更线的未切分环。输入必须已经正确转换到 WGS84；程序不猜源 CRS。
+地图与清单保存在 `runs/nara-01/maps/870/`。该命令下载 PDF/图片；如果需要从地图得到矢量边界，使用 QGIS 等工具配准和提取，方法见 [地图处理说明](../references/map-digitization.md)。
 
-## 把工作流交给 Agent
+### 复用已下载的来源
 
-保留整个仓库并安装 Python 包，让 Agent 读取根目录 `SKILL.md`。例如：
+每个运行目录保存请求响应，可在不联网时重复检索步骤：
 
-> 读取这个仓库的 SKILL.md，处理 sites.csv 中的目标。先核验官方核心图层和
-> 连续遗产组件，保存证据，只为审核通过的范围导出，缺失项明确列出。
+```bash
+unesco-boundary probe --input examples/sites.csv --run runs/nara-01 --no-osm --offline
+```
 
-只复制 `SKILL.md` 会缺少代码、模板和参考文件。本仓库尚未发布到 PyPI，
-也没有声称在所有 Agent 客户端完成了自动安装兼容性验证。
+读取最新来源时，改用新的目录，如 `runs/nara-02`。重新检查 `right or not=1` 的行时，添加 `--override-verified`。
+
+## 3. 选择边界并填写审核记录
+
+在 GIS 软件中查看候选，核对遗产名称、核心范围、位置、面积和组件覆盖。核心区与缓冲区分别处理；连续遗产应包含所需的全部组件。将选定的 WGS84 GeoJSON 保存为 `source.geojson`，再检查几何：
+
+```bash
+unesco-boundary validate source.geojson
+```
+
+输入必须是非空的 GeoJSON FeatureCollection，包含 Polygon 或 MultiPolygon。需要先修正未闭合环、无效几何、错误坐标系或未切分的跨日期变更线几何。
+
+复制 [review.template.json](../examples/review.template.json) 并命名为 `review.json`。按下表填写：
+
+| 字段 | 填写内容 |
+|---|---|
+| `local_id`、`unesco_id`、`site_name` | 与目标遗产对应的编号和名称 |
+| `source_url`、`source_kind` | 选定数据的地址和来源类型 |
+| `source_sha256` | 源文件校验值，计算方法见下方 |
+| `reviewer` | 审核人的项目用户名或角色名，无需填写私人联系方式 |
+| `reviewed_at` | 带时区的审核时间，如 `2026-01-01T09:00:00+08:00` |
+| `scope_note` | 边界版本、核心范围及包含哪些组件 |
+| `official_check` | WHC 核心图层查询地址、结果和说明；结果使用 `found`、`empty` 或 `unusable` |
+| `status`、`caveats` | 审核状态和仍需说明的问题；无问题时 `caveats` 填 `[]` |
+
+在 `source.geojson` 所在目录运行以下命令，复制输出值到 `source_sha256`：
+
+```bash
+python -c "import hashlib,pathlib; print(hashlib.sha256(pathlib.Path('source.geojson').read_bytes()).hexdigest())"
+```
+
+文件发生任何修改后，需要重新核对并计算校验值。
+
+来源类型：`official_whc`（WHC）、`official_vector`（其他官方矢量）、`osm`、`geospatial_pdf`（地理 PDF）、`digitized_map`（地图数字化）、`scale_anchor`（比例尺锚定）。`synthetic` 仅用于练习数据。
+
+### 如何选择状态
+
+| 状态 | 使用条件 |
+|---|---|
+| `review_needed` | 范围、来源、配准或面积仍待核对 |
+| `partial` | 只有部分组件，或仅作为参考图层 |
+| `correct` | 已核对来源、核心范围、位置、面积，并覆盖全部目标组件 |
+
+使用 `correct` 时，还要填写：
+
+- `checks` 的五项核对结果，均为 `true`。
+- `expected_components` 与 `covered_components`，使用一致、完整的组件 ID 列表。
+- 正数 `official_area_ha` 和 `area_comparison_note`，说明官方面积与计算面积的差别。
+- 使用替代来源时，在 `official_check` 中说明官方核心图层为何为空或不可用。
+- 地图提取结果在 `georeference_evidence` 中填写配准或控制点记录的位置。
+
+比例尺锚定和合成几何不使用 `correct`。更详细的来源选择标准见 [边界核对说明](../references/source-review.md)。
+
+## 4. 导出并在 GIS 中打开
+
+```bash
+unesco-boundary package --geojson source.geojson --review review.json --out-root outputs
+```
+
+在生成的 `outputs/<状态>/<本地编号>_<名称>/` 目录中：
+
+- 打开 `.geojson` 可读取完整属性。
+- 打开 `.shp` 可使用 Shapefile；移动时应连同 `.shx .dbf .prj .cpg` 一起移动。
+- `.md` 和 `review.json` 记录边界来源和范围，`validation.json` 记录几何检查结果。
+
+已有同名包不会被覆盖。修订结果时使用新的输出目录，例如 `--out-root outputs-v2`。
+
+## 在 Python 项目中调用
+
+安装后，可以在自己的脚本或 Notebook 中导入：
+
+```python
+import json
+from pathlib import Path
+
+from unesco_boundary.geometry import validate_collection
+from unesco_boundary.package import build_package
+
+source = Path("source.geojson")
+data = json.loads(source.read_text(encoding="utf-8-sig"))
+print(validate_collection(data))
+
+# review.json 按第 3 步填写。
+result = build_package(source, Path("review.json"), Path("outputs"))
+print(result["path"])
+```
+
+要扩展检索或导出功能，安装 `requirements-dev.txt`，修改 `src/unesco_boundary/`，运行 `python -m pytest -q` 检查兼容性。命令参数可用 `unesco-boundary --help` 和 `unesco-boundary <命令> --help` 查看。
+
+## 交给 Agent 使用
+
+让 Agent 读取完整仓库中的 [SKILL.md](../SKILL.md)，例如：
+
+> 读取 SKILL.md，处理 sites.csv 中的遗产。检索官方核心边界，核对范围与组件，按审核状态导出 GIS 包，并列出尚缺少的边界。
+
+保留完整仓库，供 Agent 使用其中的代码、模板和参考文件。

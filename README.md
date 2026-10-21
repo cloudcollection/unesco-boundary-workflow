@@ -1,103 +1,94 @@
 # UNESCO Boundary Workflow
 
-从世界遗产条目到可追溯的 GIS 边界包：先找来源，再核验范围，最后导出。
+检索世界遗产边界、下载官方地图，将选定的几何数据整理成可在 QGIS、ArcGIS 中使用的 GeoJSON 和 Shapefile。
 
-An evidence-first workflow for UNESCO World Heritage boundaries, combining
-source retrieval, official map downloads and reviewed GIS packaging.
+适用于世界遗产空间研究、GIS 课程练习，以及需要统一整理多个遗产边界的项目。既可以在终端运行，也可以作为 Python 库调用。
 
 ![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB)
 [![Checks](https://github.com/cloudcollection/unesco-boundary-workflow/actions/workflows/checks.yml/badge.svg)](https://github.com/cloudcollection/unesco-boundary-workflow/actions/workflows/checks.yml)
 
-## 这个仓库做什么
+## 可以做什么
 
-| 功能 | 得到什么 |
-|---|---|
-| `probe` | WHC 官方图层、OSM 候选、来源记录和待审核清单 |
-| `maps` | 官方地图 PDF/图片及下载清单，拒绝把 HTML 当图片 |
-| `validate` | 多边形、闭环、坐标范围和椭球面积检查 |
-| `package` | 经审核的 GeoJSON、Shapefile、说明和校验文件 |
-
-统一的 [SKILL.md](SKILL.md) 串起这四步。它整合了
-`unesco-whc-osm-boundary-retriever`、`unesco-boundary-packager` 和
-`UNESCO_Map_SC`；[原仓库盘点](docs/repository-audit.md) 记录了内容、代码问题和迁移关系。
+| 命令 | 用途 | 结果 |
+|---|---|---|
+| `probe` | 按遗产清单检索 WHC 官方图层和 OSM 候选 | 候选 GeoJSON、来源记录、检索汇总 |
+| `maps` | 下载官方 maps 页面链接的 PDF 和图片 | 地图文件及下载清单 |
+| `validate` | 检查几何、闭环和坐标范围，计算面积 | 几何检查结果 |
+| `package` | 将选定的边界与审核记录一起导出 | GeoJSON、Shapefile、说明与校验文件 |
 
 ```mermaid
 flowchart LR
-    A[遗产 ID 与组件] --> B[WHC 官方核心边界]
-    B --> C[候选几何]
-    B --> D[缺失或不可用]
-    D --> E[其他官方矢量 / OSM]
-    D --> F[官方地图文档]
-    F --> G[有证据的提取或配准]
-    E --> C
-    G --> C
-    C --> H[来源、位置、面积、组件审核]
-    H --> I[按审核状态导出 GIS 包]
+    A[准备遗产清单] --> B[检索边界 / 下载地图]
+    B --> C[选择并核对边界]
+    C --> D[检查几何]
+    D --> E[导出 GIS 数据包]
 ```
 
-## 快速开始
+## 安装与第一次运行
 
-需要 Python 3.12+。在项目环境中安装：
+需要 Python 3.12 或更新版本。在终端中运行：
 
 ```bash
 git clone https://github.com/cloudcollection/unesco-boundary-workflow.git
 cd unesco-boundary-workflow
 python -m venv .venv
-# 激活 .venv 后：Windows 用 .venv\Scripts\Activate.ps1；macOS/Linux 用 source .venv/bin/activate
+```
+
+激活环境：Windows PowerShell 使用 `.\.venv\Scripts\Activate.ps1`；macOS/Linux 使用 `source .venv/bin/activate`。然后安装并运行离线示例：
+
+```bash
 python -m pip install -r requirements.lock.txt
 python -m pip install --no-deps -e .
 python scripts/demo.py --out runs/demo
 ```
 
-演示完全离线，用带孔、多岛和中文属性的**合成数据**检查导出；它不是实际遗产边界。
-Windows 临时目录与环境复现方法见 [运行说明](docs/workflow.md)。
+示例使用合成几何，不需要联网。生成的数据包位于：
 
-真实数据从命名列 CSV/XLSX 开始，格式见 [sites.csv](examples/sites.csv)：
-
-```bash
-unesco-boundary probe --input examples/sites.csv --run runs/nara-01 --no-osm --user-agent "MyResearch/1.0 (https://github.com/YOUR_ACCOUNT)"
-unesco-boundary maps --unesco-id 870 --run runs/nara-01 --user-agent "MyResearch/1.0 (https://github.com/YOUR_ACCOUNT)"
+```text
+runs/demo/packages/review_needed/1_Synthetic demo/
 ```
 
-请把 User-Agent 换成自己的联系方式。去掉 `--no-osm` 可查询 OSM 候选。
-每个 run 保存响应原文、请求 URL、时间和 SHA-256；加 `--offline` 可重放同一快照。
-读取更新后的来源时请用新的 run 目录。
+在 QGIS 中打开其中的 `.geojson` 或 `.shp`，即可查看带孔洞的多岛几何。再次运行时请换一个输出目录，例如 `runs/demo-02`。
 
-选定几何后，按 [审核说明](references/source-review.md) 填写
-[review.template.json](examples/review.template.json)，再导出：
+## 处理真实遗产
+
+准备 CSV 或 XLSX，至少包含以下三列；示例见 [sites.csv](examples/sites.csv)：
+
+| id | unesco_id | site_name |
+|---|---|---|
+| 615 | 870 | Historic Monuments of Ancient Nara |
+
+`id` 是项目自定编号，`unesco_id` 是 UNESCO 官方遗产编号。两者可以不同。
+
+先查询官方边界，再按需下载地图。把 `YOUR_ACCOUNT` 换成自己的公开项目或个人主页地址：
+
+```bash
+unesco-boundary probe --input examples/sites.csv --run runs/nara-01 --no-osm --user-agent "BoundaryStudy/1.0 (https://github.com/YOUR_ACCOUNT)"
+unesco-boundary maps --unesco-id 870 --run runs/nara-01 --user-agent "BoundaryStudy/1.0 (https://github.com/YOUR_ACCOUNT)"
+```
+
+检索汇总保存在 `runs/nara-01/retrieval.md`，候选边界在 `candidates/`，地图文档在 `maps/`。去掉 `--no-osm` 可检索 OSM 候选；官方图层为空时仍需选择其他边界来源。
+
+选定边界后，完成 [审核与导出步骤](docs/workflow.md#3-选择边界并填写审核记录)，再运行：
 
 ```bash
 unesco-boundary validate source.geojson
 unesco-boundary package --geojson source.geojson --review review.json --out-root outputs
 ```
 
-## 输出与边界
+这里的 `source.geojson` 和 `review.json` 分别是你选定的边界和填写完成的审核文件。地图 PDF/图片转成矢量边界、配准和复杂 OSM 关系拼接需要另行使用 GIS 工具完成。
 
-每个遗产保存为 `outputs/<status>/<本地ID>_<名称>/`，包含同名的
-`.md .geojson .shp .shx .dbf .prj .cpg`，以及 `review.json`、
-`validation.json`、`checksums.json`。原始属性保存在 GeoJSON，DBF 保留精简索引。
+## 得到什么文件
 
-| 状态 | 含义 |
+每个遗产对应一个 `outputs/<状态>/<本地编号>_<名称>/` 文件夹：
+
+| 文件 | 用途 |
 |---|---|
-| `correct` | 审核人确认核心范围、来源、位置、面积及全部组件 |
-| `partial` | 只有部分组件或仅可作参考 |
-| `review_needed` | 范围、配准或其他证据仍有不确定性 |
+| 同名 `.geojson` | 完整几何和原始属性 |
+| 同名 `.shp .shx .dbf .prj .cpg` | Shapefile，可在 GIS 软件中打开；这些文件需一起保留 |
+| 同名 `.md`、`review.json` | 边界来源、范围与审核说明 |
+| `validation.json`、`checksums.json` | 几何检查结果和文件校验值 |
 
-下载成功、名称相似和几何有效都不足以证明边界正确。没有可信多边形就报告缺失，
-不生成圆、框或猜测范围。PDF 配准、复杂 OSM 关系拼接和官方替代来源判断仍需
-GIS 操作与审核；比例尺加中心点的结果不能进入 `correct`。
+状态分为 `correct`（已完成范围与组件核对）、`partial`（部分组件）和 `review_needed`（待进一步核对）。输入几何使用 WGS84 经纬度，支持 Polygon 和 MultiPolygon。
 
-## 验证与来源
-
-```bash
-python -m pytest -q
-python scripts/check_skill.py
-```
-
-测试覆盖离线重放、下载错误、审核与文件绑定，以及多岛、孔洞和中文属性的导出回读。
-联网来源会变化，软件测试通过不等于某个遗产的边界已获认证。
-
-[设计参考](docs/design-references.md) · [复现与运行](docs/workflow.md) · [代码审阅](docs/repository-audit.md) · [验证记录](docs/validation.md)
-
-新增代码和文档采用 [MIT](LICENSE)；注明的改写模块保留
-[Apache 2.0](licenses/Apache-2.0.txt)，详见 [NOTICE](NOTICE)。地图和地理数据遵循各自发布方条款。
+[完整使用教程与 Python 调用](docs/workflow.md) · [Agent 工作流](SKILL.md)

@@ -16,7 +16,7 @@ not an acceptance decision.
 | Coverage | Explicit expected/covered/missing component lists, not just feature count |
 | Decision | Source URL, reviewer, date, caveats and rejected alternatives |
 
-WHC layer numbers follow the source repositories' current endpoint convention;
+WHC layer numbers follow the current endpoint convention;
 recheck service metadata if the service changes. The probe rejects reported
 transfer-limit truncation; it does not silently accept a first page. Preserve raw
 layer-0 attributes instead of choosing the first field whose name contains “area”.
